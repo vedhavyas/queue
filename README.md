@@ -18,8 +18,9 @@ Queue represents the FIFO list of items
 ```go
 func (q *Queue) Dequeue() (interface{}, error)
 ```
-Dequeue returns the first item from queue: O(1). if queue is empty, returns an
-error
+Dequeue returns the first item from queue: O(1)
+
+Returns an error if queue empty/out of bounds
 
 #### func (*Queue) Enqueue
 
@@ -33,8 +34,9 @@ Enqueue add the item to the queue: O(1)
 ```go
 func (q *Queue) Get(i int) (interface{}, error)
 ```
-Get returns the item at the given index from the list: O(n) returns an error if
-queue empty/out of bounds
+Get returns the item at the given index from the list: O(n)
+
+Returns an error if queue empty/out of bounds
 
 #### func (*Queue) Len
 
@@ -49,15 +51,17 @@ Len returns the items count in the queue
 func (q *Queue) Peak() (interface{}, error)
 ```
 Peak returns the next value in queue but does not remove from queue: O(1)
-returns error if queue empty
+
+Returns error if queue empty
 
 #### func (*Queue) PeakAt
 
 ```go
 func (q *Queue) PeakAt(i int) (interface{}, error)
 ```
-PeakAt returns the item at the index i from the queue: O(n) returns error if
-queue empty/out of bounds
+PeakAt returns the item at the index i from the queue: O(n)
+
+Returns error if queue empty/out of bounds
 
 #### func (*Queue) String
 
