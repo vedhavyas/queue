@@ -1,3 +1,8 @@
+/*
+package queue implements the Queue FIFO with O(1) for
+Enqueue and Dequeue operations.
+*/
+
 package queue
 
 import (
@@ -6,7 +11,7 @@ import (
 	"sync"
 )
 
-var iobError = fmt.Errorf("Index out of bounds")
+var iobError = fmt.Errorf("Queue: Index out of bounds")
 
 type (
 	// node is a single item in the queue
@@ -48,7 +53,7 @@ func (q *Queue) enqueue(item interface{}) {
 	q.last = n
 }
 
-// Enqueue add the item to the queue
+// Enqueue add the item to the queue: O(1)
 func (q *Queue) Enqueue(item interface{}) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
@@ -72,8 +77,8 @@ func (q *Queue) dequeue() (interface{}, error) {
 	return n.value, nil
 }
 
-// Dequeue returns the first item from queue.
-// if queue is empty, returns and error
+// Dequeue returns the first item from queue: O(1).
+// if queue is empty, returns an error
 func (q *Queue) Dequeue() (interface{}, error) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
@@ -81,7 +86,8 @@ func (q *Queue) Dequeue() (interface{}, error) {
 	return q.dequeue()
 }
 
-// Get returns the item at the given index from the list
+// Get returns the item at the given index from the list: O(n)
+// returns an error if queue empty/out of bounds
 func (q *Queue) Get(i int) (interface{}, error) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
@@ -132,7 +138,8 @@ func (q *Queue) peakAt(i int) (interface{}, error) {
 	return n.value, nil
 }
 
-// Peak returns the next value in queue but does not remove from queue
+// Peak returns the next value in queue but does not remove from queue: O(1)
+// returns error if queue empty
 func (q *Queue) Peak() (interface{}, error) {
 	q.mu.RLock()
 	defer q.mu.RUnlock()
@@ -140,7 +147,8 @@ func (q *Queue) Peak() (interface{}, error) {
 	return q.peakAt(0)
 }
 
-// PeakAt returns the item at the index i from the queue
+// PeakAt returns the item at the index i from the queue: O(n)
+// returns error if queue empty/out of bounds
 func (q *Queue) PeakAt(i int) (interface{}, error) {
 	q.mu.RLock()
 	defer q.mu.RUnlock()
@@ -148,8 +156,7 @@ func (q *Queue) PeakAt(i int) (interface{}, error) {
 	return q.peakAt(i)
 }
 
-// String dumps the queue in human readable format
-// O(n)
+// String dumps the queue in human readable format: O(n)
 func (q *Queue) String() string {
 	var buffer bytes.Buffer
 	buffer.WriteString("[")
