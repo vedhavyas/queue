@@ -115,16 +115,37 @@ func (q *Queue) Get(i int) (interface{}, error) {
 	return n.value, nil
 }
 
+func (q *Queue) peakAt(i int) (interface{}, error) {
+	if i >= q.count {
+		return nil, iobError
+	}
+	var n *node
+	for x := 0; x <= i; x++ {
+		if n == nil {
+			n = q.first
+			continue
+		}
+
+		n = n.next
+	}
+
+	return n.value, nil
+}
+
 // Peak returns the next value in queue but does not remove from queue
 func (q *Queue) Peak() (interface{}, error) {
 	q.mu.RLock()
 	defer q.mu.RUnlock()
 
-	if q.first == nil {
-		return nil, iobError
-	}
+	return q.peakAt(0)
+}
 
-	return q.first.value, nil
+// PeakAt returns the item at the index i from the queue
+func (q *Queue) PeakAt(i int) (interface{}, error) {
+	q.mu.RLock()
+	defer q.mu.RUnlock()
+
+	return q.peakAt(i)
 }
 
 // String dumps the queue in human readable format

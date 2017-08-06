@@ -153,3 +153,43 @@ func TestQueue_Peak(t *testing.T) {
 		q.Dequeue()
 	}
 }
+
+func TestQueue_PeakAt(t *testing.T) {
+	q := &Queue{}
+	for i := 0; i < 5; i++ {
+		q.Enqueue(i)
+	}
+
+	tests := []struct {
+		i     int
+		value int
+		len   int
+		err   bool
+	}{
+		{i: 1, value: 1, len: 5},
+		{i: 5, err: true},
+		{i: 3, value: 3, len: 5},
+		{i: 0, value: 0, len: 5},
+		{i: 2, value: 2, len: 5},
+	}
+
+	for _, c := range tests {
+		v, err := q.PeakAt(c.i)
+		if err != nil {
+			if c.err {
+				continue
+			}
+
+			t.Fatalf("Expected %d but got an error: %v\n", c.value, err)
+		}
+
+		if c.value != v.(int) {
+			t.Fatalf("Expected %d but got %v\n", c.value, v)
+		}
+
+		if c.len != q.Len() {
+			t.Fatalf("Expected queue length %d but got %d\n", c.len, q.Len())
+		}
+
+	}
+}
