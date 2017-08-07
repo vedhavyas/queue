@@ -193,3 +193,139 @@ func TestQueue_PeakAt(t *testing.T) {
 
 	}
 }
+
+func TestQueue_Next(t *testing.T) {
+	q := &Queue{}
+	for i := 0; i < 5; i++ {
+		q.Enqueue(i)
+	}
+
+	tests := []struct {
+		value int
+		len   int
+		err   bool
+	}{
+		{value: 0, len: 4},
+		{value: 1, len: 3},
+		{value: 2, len: 2},
+		{value: 3, len: 1},
+		{value: 4, len: 0},
+		{err: true},
+	}
+
+	q.ResetRange()
+	for _, c := range tests {
+		v := q.Next()
+		if v == nil {
+			if c.err {
+				continue
+			}
+
+			t.Fatalf("Expected value %v but got nil\n", c.value)
+		}
+
+		if c.value != v.(int) {
+			t.Fatalf("Expected %d but got %v\n", c.value, v)
+		}
+	}
+}
+
+func TestQueue_CutRangeItem_one(t *testing.T) {
+	q := &Queue{}
+	q.Enqueue(1)
+
+	q.ResetRange()
+	q.Next()
+	q.CutRangeItem()
+
+	if q.Len() != 0 {
+		t.Fatalf("Expected 0 but got %d\n", q.Len())
+	}
+
+	v, err := q.Dequeue()
+	if err == nil {
+		t.Fatalf("Expected error but got: %v", v)
+	}
+}
+
+func TestQueue_CutRangeItem_two_start(t *testing.T) {
+	q := &Queue{}
+	q.Enqueue(0)
+	q.Enqueue(1)
+
+	q.ResetRange()
+	q.Next()
+	q.CutRangeItem()
+
+	if q.Len() != 1 {
+		t.Fatalf("Expected 1 but got %d\n", q.Len())
+	}
+
+	v, err := q.Dequeue()
+	if err != nil {
+		t.Fatalf("Expected value but got: %v\n", err)
+	}
+
+	if v.(int) != 1 {
+		t.Fatalf("Expected %d but got %v\n", 1, v)
+	}
+}
+
+func TestQueue_CutRangeItem_two_end(t *testing.T) {
+	q := &Queue{}
+	q.Enqueue(0)
+	q.Enqueue(1)
+
+	q.ResetRange()
+	q.Next()
+	q.Next()
+	q.CutRangeItem()
+
+	if q.Len() != 1 {
+		t.Fatalf("Expected 1 but got %d\n", q.Len())
+	}
+
+	v, err := q.Dequeue()
+	if err != nil {
+		t.Fatalf("Expected value but got: %v\n", err)
+	}
+
+	if v.(int) != 0 {
+		t.Fatalf("Expected %d but got %v\n", 0, v)
+	}
+}
+
+func TestQueue_CutRangeItem_middle(t *testing.T) {
+	q := &Queue{}
+	q.Enqueue(0)
+	q.Enqueue(1)
+	q.Enqueue(2)
+
+
+	q.ResetRange()
+	q.Next()
+	q.Next()
+	q.CutRangeItem()
+
+	if q.Len() != 2 {
+		t.Fatalf("Expected 1 but got %d\n", q.Len())
+	}
+
+	v, err := q.Dequeue()
+	if err != nil {
+		t.Fatalf("Expected value but got: %v\n", err)
+	}
+
+	if v.(int) != 0 {
+		t.Fatalf("Expected %d but got %v\n", 0, v)
+	}
+
+	v, err = q.Dequeue()
+	if err != nil {
+		t.Fatalf("Expected value but got: %v\n", err)
+	}
+
+	if v.(int) != 2 {
+		t.Fatalf("Expected %d but got %v\n", 0, v)
+	}
+}

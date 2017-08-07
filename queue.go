@@ -24,10 +24,11 @@ type (
 
 	// Queue represents the FIFO list of items
 	Queue struct {
-		count int
-		first *node
-		last  *node
-		mu    sync.RWMutex // protects the items above
+		count   int
+		first   *node
+		last    *node
+		current *node
+		mu      sync.RWMutex // protects the items above
 	}
 )
 
@@ -71,6 +72,8 @@ func (q *Queue) dequeue() (interface{}, error) {
 	nn := n.next
 	if nn != nil {
 		nn.prev = n.prev
+	} else {
+		q.last = nil
 	}
 
 	q.first = nn
@@ -170,4 +173,73 @@ func (q *Queue) String() string {
 	}
 	buffer.WriteString("]")
 	return buffer.String()
+}
+
+// ResetRange will set the seek to start: O(1)
+func (q *Queue) ResetRange() {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+
+	q.current = nil
+}
+
+// Next will return the next item in queue
+// Returns nil if the range reaches the end of the queue: O(n)
+func (q *Queue) Next() interface{} {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+
+	if q.count == 0 {
+		return nil
+	}
+
+	if q.current == nil {
+		q.current = q.first
+	} else {
+		q.current = q.current.next
+	}
+
+	if q.current == nil {
+		return nil
+	}
+
+	return q.current.value
+}
+
+// CutRangeItem removes the current item in the range: O(1)
+func (q *Queue) CutRangeItem() {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+
+	if q.count == 0 || q.current == nil {
+		return
+	}
+
+	defer func() { q.count-- }()
+
+	if q.count == 1 {
+		q.current = nil
+		q.first = nil
+		q.last = nil
+		return
+	}
+
+	p := q.current.prev
+	nn := q.current.next
+
+	if nn != nil {
+		nn.prev = p
+		if p == nil {
+			q.first = nn
+		}
+	}
+
+	if p != nil {
+		p.next = nn
+		if nn == nil {
+			q.last = p
+		}
+	}
+
+	q.current = q.current.prev
 }
