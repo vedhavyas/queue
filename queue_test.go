@@ -301,7 +301,6 @@ func TestQueue_CutRangeItem_middle(t *testing.T) {
 	q.Enqueue(1)
 	q.Enqueue(2)
 
-
 	q.ResetRange()
 	q.Next()
 	q.Next()
@@ -327,5 +326,50 @@ func TestQueue_CutRangeItem_middle(t *testing.T) {
 
 	if v.(int) != 2 {
 		t.Fatalf("Expected %d but got %v\n", 0, v)
+	}
+}
+
+func TestQueue_CutRangeItem(t *testing.T) {
+	q := &Queue{}
+	for i := 0; i < 5; i++ {
+		q.Enqueue(i)
+	}
+
+	tests := []struct {
+		dequeue bool
+		value   int
+		length  int
+		error   bool
+	}{
+		{dequeue: true, value: 0, length: 4},
+		{dequeue: false, value: 1, length: 4},
+		{dequeue: true, value: 2, length: 3},
+		{dequeue: true, value: 3, length: 2},
+		{dequeue: false, value: 4, length: 2},
+		{error: true},
+	}
+
+	q.ResetRange()
+	for _, c := range tests {
+		v := q.Next()
+		if v == nil {
+			if c.error {
+				continue
+			}
+
+			t.Fatalf("Expected %d but got nil\n", c.value)
+		}
+
+		if c.value != v.(int) {
+			t.Fatalf("Expected %d but got %v\n", c.value, v)
+		}
+
+		if c.dequeue {
+			q.CutRangeItem()
+		}
+
+		if c.length != q.Len() {
+			t.Fatalf("Expected length %d but got %v\n", c.length, q.Len())
+		}
 	}
 }
