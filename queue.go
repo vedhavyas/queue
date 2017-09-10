@@ -71,7 +71,7 @@ func (q *Queue) dequeue() (interface{}, error) {
 	n := q.first
 	nn := n.next
 	if nn != nil {
-		nn.prev = n.prev
+		nn.prev = nil
 	} else {
 		q.last = nil
 	}
